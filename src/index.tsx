@@ -20,16 +20,21 @@ import App from "./App";
 
 const container = document.getElementById("root");
 
-// const updateValue = e => {
-//   rerender(e.target.value)
-// }
+const rerender = (value) => {
+  const element = (
+    <div>
+      <input onInput={updateValue} value={value} />
+      <h2>Hello {value}</h2>
+      <h2>Hello {value}</h2>
+      <h2>Hello {value}</h2>
+    </div>
+  );
+  render(element, container!);
+};
 
-const element = (
-  <div>
-    <input />
-    <h2>Hello value</h2>
-    <h2>Hello value</h2>
-    <h2>Hello value</h2>
-  </div>
-);
-render(element, container!);
+function updateValue(e) {
+  console.log(e.target.value);
+  rerender(e.target.value);
+}
+
+rerender("123");

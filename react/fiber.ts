@@ -38,18 +38,32 @@ export class Fiber {
   };
 
   // delete old attr & add new attr
-  updateAttr = (dom: HTMLElement = this.dom as HTMLElement) => {
-    const { __source, children, ...newrest } = this.props;
-    if (this.alternate) {
-      const { __source, children, ...oldrest } = this.alternate.props;
-      Object.keys(oldrest).forEach((element) => {
-        if (!(element in newrest)) {
-          dom.removeAttribute(element);
-        }
-      });
+  updateAttr = (dom: HTMLElement | Text = this.dom) => {
+    const { __source: b, children: c, ...newrest } = this.props;
+    const { __source: a, children: d, ...oldrest } =
+      this.alternate?.props || {};
+    if (this.type === "TEXT_ELEMENT") {
+      if (newrest.nodeValue !== oldrest.nodeValue) {
+        (dom as Text).data = newrest.nodeValue;
+      }
+      return dom;
     }
+    Object.keys(oldrest).forEach((element) => {
+      if (element.startsWith("on") && oldrest[element] !== newrest?.[element]) {
+        dom.removeEventListener(
+          element.slice(2).toLowerCase(),
+          oldrest[element]
+        );
+      } else if (!(element in newrest)) {
+        (dom as HTMLElement).removeAttribute(element);
+      }
+    });
     Object.keys(newrest).forEach((element) => {
-      dom.setAttribute(element, newrest[element]);
+      if (element.startsWith("on") && oldrest?.[element] !== newrest[element]) {
+        dom.addEventListener(element.slice(2).toLowerCase(), newrest[element]);
+      } else {
+        (dom as HTMLElement).setAttribute(element, newrest[element]);
+      }
     });
     return dom;
   };
