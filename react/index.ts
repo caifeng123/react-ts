@@ -8,14 +8,15 @@ let currentRoot: any = null;
 let deletions: Fiber[] = [];
 
 export const render = (element: JSX.Element, container: HTMLElement) => {
-  wipRoot = {
-    type: "",
-    dom: container,
-    props: {
-      children: [element]
-    },
-    alternate: currentRoot
-  };
+  // wipRoot = {
+  //   type: "",
+  //   dom: container,
+  //   props: {
+  //     children: [element]
+  //   },
+  //   alternate: currentRoot
+  // };
+  wipRoot = new Fiber(element, { dom: container, alternate: currentRoot });
   deletions = [];
   nextUnitOfWork = wipRoot;
 };
@@ -58,6 +59,8 @@ const reconcileChildren = (fiber: Fiber) => {
   let now: Fiber | null = null;
   while (index < children.length || oldFiber) {
     const element = children[index];
+    console.log(element);
+
     const sameType = oldFiber && element && element.type === oldFiber.type;
     if (sameType) {
       // update node props
@@ -84,11 +87,11 @@ const reconcileChildren = (fiber: Fiber) => {
       oldFiber = oldFiber.sibling;
     }
     if (head) {
-      now?.connectPrev(head);
+      head.connectSibling(now!);
     } else if (now) {
-      head = now;
-      fiber?.connectChild?.(now);
+      fiber.connectChild(now);
     }
+    head = now;
     index++;
   }
 };
@@ -126,5 +129,5 @@ const workLoop = (deadline: IdleDeadline) => {
 };
 
 export const change = (node: JSX.Element) => {};
-
+// console.log(111)
 requestIdleCallback(workLoop);

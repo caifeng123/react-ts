@@ -28,6 +28,8 @@ const element = (
   <div>
     <input />
     <h2>Hello value</h2>
+    <h2>Hello value</h2>
+    <h2>Hello value</h2>
   </div>
 );
 render(element, container!);

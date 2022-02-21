@@ -32,7 +32,7 @@ export class Fiber {
 
   createDom = () => {
     if (this.type === "TEXT_ELEMENT") {
-      return document.createTextNode("");
+      return document.createTextNode(this.props.nodeValue);
     }
     return this.updateAttr(document.createElement(this.type));
   };
@@ -53,7 +53,7 @@ export class Fiber {
     });
     return dom;
   };
-  connectPrev(preFiber: Fiber) {
+  connectSibling(preFiber: Fiber) {
     this.sibling = preFiber;
   }
 
