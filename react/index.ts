@@ -4,34 +4,19 @@ export * from "./createObj";
 
 let nextUnitOfWork: Fiber | null = null;
 let wipRoot: any = null;
+let currentRoot: any = null;
+let deletions: Fiber[] = [];
 
 export const render = (element: JSX.Element, container: HTMLElement) => {
-  // const dom =
-  //   element.type === "TEXT_ELEMENT"
-  //     ? document.createTextNode("")
-  //     : document.createElement(element.type);
-  // element.props.children?.forEach((temp: JSX.Element) => {
-  //   render(temp, dom);
-  // });
-  // const { __source, children, ...rest } = element.props;
-  // Object.keys(rest).forEach((element) => {
-  //   dom[element] = rest[element];
-  // });
-
-  // container.appendChild(dom);
-  // {
-  //   dom: container,
-  //   props: {
-  //     children: [element]
-  //   }
-  // }
   wipRoot = {
     type: "",
     dom: container,
     props: {
       children: [element]
-    }
+    },
+    alternate: currentRoot
   };
+  deletions = [];
   nextUnitOfWork = wipRoot;
 };
 
@@ -43,6 +28,13 @@ const commitWork = (fiber: Fiber) => {
     return;
   }
   const domParent = fiber.parent!.dom;
+  if (fiber.effectTag === "PLACEMENT" && fiber.dom) {
+    domParent.appendChild(fiber.dom);
+  } else if (fiber.effectTag === "UPDATE") {
+    fiber.updateAttr();
+  } else if (fiber.effectTag === "DELETION") {
+    domParent.removeChild(fiber.dom);
+  }
   domParent!.appendChild(fiber.dom!);
   commitWork(fiber.child!);
   commitWork(fiber.sibling!);
@@ -52,21 +44,53 @@ const commitWork = (fiber: Fiber) => {
  * 渲染单棵 fiber 树
  */
 const commitRoot = () => {
+  deletions.forEach(commitWork);
   commitWork(wipRoot.child);
+  currentRoot = wipRoot;
   wipRoot = null;
 };
 
 const reconcileChildren = (fiber: Fiber) => {
   let head: Fiber | null = null;
-  fiber.props.children?.forEach((child) => {
-    const now = new Fiber(child, fiber);
-    if (head) {
-      now.connectPrev(head);
-    } else {
-      head = now;
-      fiber.connectChild(now);
+  let oldFiber = fiber.alternate && fiber.alternate.child;
+  const children = fiber.props.children!;
+  let index = 0;
+  let now: Fiber | null = null;
+  while (index < children.length || oldFiber) {
+    const element = children[index];
+    const sameType = oldFiber && element && element.type === oldFiber.type;
+    if (sameType) {
+      // update node props
+      now = new Fiber(element, {
+        parentFiber: fiber,
+        effectTag: "UPDATE",
+        dom: oldFiber!.dom,
+        alternate: oldFiber
+      });
     }
-  });
+    if (element && !sameType) {
+      // add new node
+      now = new Fiber(element, {
+        parentFiber: fiber,
+        effectTag: "PLACEMENT"
+      });
+    }
+    if (oldFiber && !sameType) {
+      // delete the oldFiber's node
+      oldFiber.effectTag = "DELETION";
+      deletions.push(oldFiber);
+    }
+    if (oldFiber) {
+      oldFiber = oldFiber.sibling;
+    }
+    if (head) {
+      now?.connectPrev(head);
+    } else if (now) {
+      head = now;
+      fiber?.connectChild?.(now);
+    }
+    index++;
+  }
 };
 
 const performUnitOfWork = (fiber: Fiber) => {
@@ -102,3 +126,5 @@ const workLoop = (deadline: IdleDeadline) => {
 };
 
 export const change = (node: JSX.Element) => {};
+
+requestIdleCallback(workLoop);

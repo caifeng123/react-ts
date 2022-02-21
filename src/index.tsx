@@ -6,14 +6,28 @@ import App from "./App";
 /** @jsxRuntime classic */
 /** @jsx createElement */
 
+// const element = (
+//   <div id="foo">
+//     <a href="https://www.baidu.com">bar123</a>
+//     <b>111</b>
+//   </div>
+// );
+
+// console.log(element);
+
+// const rootElement = document.getElementById("root");
+// render(element, rootElement!);
+
+const container = document.getElementById("root");
+
+// const updateValue = e => {
+//   rerender(e.target.value)
+// }
+
 const element = (
-  <div id="foo">
-    <a href="https://www.baidu.com">bar123</a>
-    <b>111</b>
+  <div>
+    <input />
+    <h2>Hello value</h2>
   </div>
 );
-
-console.log(element);
-
-const rootElement = document.getElementById("root");
-render(element, rootElement!);
+render(element, container!);

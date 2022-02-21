@@ -1,3 +1,10 @@
+type options = {
+  parentFiber?: Fiber;
+  effectTag?: "UPDATE" | "PLACEMENT" | "DELETION";
+  dom?: HTMLElement | Text;
+  alternate?: Fiber;
+};
+
 export class Fiber {
   type: string;
   dom: HTMLElement | Text;
@@ -8,30 +15,48 @@ export class Fiber {
   parent?: Fiber;
   sibling?: Fiber;
   child?: Fiber;
+  alternate?: Fiber;
+  effectTag?: "UPDATE" | "PLACEMENT" | "DELETION";
 
-  constructor(element: JSX.Element, parentFiber?: Fiber) {
+  constructor(
+    element: JSX.Element,
+    { parentFiber, effectTag, dom, alternate }: options = {}
+  ) {
     this.type = element.type;
     this.props = element.props;
     this.parent = parentFiber;
-    this.dom = this.createDom();
+    this.effectTag = effectTag;
+    this.alternate = alternate;
+    this.dom = dom || this.createDom();
   }
 
   createDom = () => {
     if (this.type === "TEXT_ELEMENT") {
       return document.createTextNode("");
     }
-    const dom = document.createElement(this.type);
+    return this.updateAttr(document.createElement(this.type));
+  };
 
-    const { __source, children, ...rest } = this.props;
-    Object.keys(rest).forEach((element) => {
-      dom.setAttribute(element, rest[element]);
+  // delete old attr & add new attr
+  updateAttr = (dom: HTMLElement = this.dom as HTMLElement) => {
+    const { __source, children, ...newrest } = this.props;
+    if (this.alternate) {
+      const { __source, children, ...oldrest } = this.alternate.props;
+      Object.keys(oldrest).forEach((element) => {
+        if (!(element in newrest)) {
+          dom.removeAttribute(element);
+        }
+      });
+    }
+    Object.keys(newrest).forEach((element) => {
+      dom.setAttribute(element, newrest[element]);
     });
     return dom;
   };
-
   connectPrev(preFiber: Fiber) {
     this.sibling = preFiber;
   }
+
   connectChild(child: Fiber) {
     this.child = child;
   }
