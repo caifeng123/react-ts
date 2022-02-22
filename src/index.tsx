@@ -1,7 +1,7 @@
-import * as React from "react";
+import React from "react";
 import { createElement, render } from "../react";
 
-import App from "./App";
+// import App from "./App";
 
 /** @jsxRuntime classic */
 /** @jsx createElement */
@@ -33,7 +33,6 @@ const rerender = (value) => {
 };
 
 function updateValue(e) {
-  console.log(e.target.value);
   rerender(e.target.value);
 }
 

@@ -1,5 +1,5 @@
 type options = {
-  parentFiber?: Fiber;
+  parent?: Fiber;
   effectTag?: "UPDATE" | "PLACEMENT" | "DELETION";
   dom?: HTMLElement | Text;
   alternate?: Fiber;
@@ -20,11 +20,11 @@ export class Fiber {
 
   constructor(
     element: JSX.Element,
-    { parentFiber, effectTag, dom, alternate }: options = {}
+    { parent, effectTag, dom, alternate }: options = {}
   ) {
     this.type = element.type;
     this.props = element.props;
-    this.parent = parentFiber;
+    this.parent = parent;
     this.effectTag = effectTag;
     this.alternate = alternate;
     this.dom = dom || this.createDom();
@@ -49,18 +49,25 @@ export class Fiber {
       return dom;
     }
     Object.keys(oldrest).forEach((element) => {
-      if (element.startsWith("on") && oldrest[element] !== newrest?.[element]) {
-        dom.removeEventListener(
-          element.slice(2).toLowerCase(),
-          oldrest[element]
-        );
+      if (element.startsWith("on")) {
+        if (oldrest[element] !== newrest?.[element]) {
+          dom.removeEventListener(
+            element.slice(2).toLowerCase(),
+            oldrest[element]
+          );
+        }
       } else if (!(element in newrest)) {
         (dom as HTMLElement).removeAttribute(element);
       }
     });
     Object.keys(newrest).forEach((element) => {
-      if (element.startsWith("on") && oldrest?.[element] !== newrest[element]) {
-        dom.addEventListener(element.slice(2).toLowerCase(), newrest[element]);
+      if (element.startsWith("on")) {
+        if (oldrest?.[element] !== newrest[element]) {
+          dom.addEventListener(
+            element.slice(2).toLowerCase(),
+            newrest[element]
+          );
+        }
       } else {
         (dom as HTMLElement).setAttribute(element, newrest[element]);
       }

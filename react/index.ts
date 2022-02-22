@@ -31,7 +31,6 @@ const commitWork = (fiber: Fiber) => {
   } else if (fiber.effectTag === "DELETION") {
     domParent.removeChild(fiber.dom);
   }
-  domParent!.appendChild(fiber.dom!);
   commitWork(fiber.child!);
   commitWork(fiber.sibling!);
 };
@@ -59,7 +58,7 @@ const reconcileChildren = (fiber: Fiber) => {
     if (sameType) {
       // update node props
       now = new Fiber(element, {
-        parentFiber: fiber,
+        parent: fiber,
         effectTag: "UPDATE",
         dom: oldFiber!.dom,
         alternate: oldFiber
@@ -68,7 +67,7 @@ const reconcileChildren = (fiber: Fiber) => {
     if (element && !sameType) {
       // add new node
       now = new Fiber(element, {
-        parentFiber: fiber,
+        parent: fiber,
         effectTag: "PLACEMENT"
       });
     }
@@ -118,7 +117,6 @@ const workLoop = (deadline: IdleDeadline) => {
   if (!nextUnitOfWork && wipRoot) {
     commitRoot();
   }
-
   requestIdleCallback(workLoop);
 };
 
