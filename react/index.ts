@@ -120,6 +120,4 @@ const workLoop = (deadline: IdleDeadline) => {
   requestIdleCallback(workLoop);
 };
 
-export const change = (node: JSX.Element) => {};
-
 requestIdleCallback(workLoop);
