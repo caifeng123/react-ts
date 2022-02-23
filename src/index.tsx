@@ -20,20 +20,33 @@ import { createElement, render } from "../react";
 
 const container = document.getElementById("root");
 
-const rerender = (value) => {
-  const element = (
+const Rerender = ({ value }) => {
+  return (
     <div>
-      <input onInput={updateValue} value={value} />
+      {/* <input onInput={updateValue} value={value} /> */}
       <h2>Hello {value}</h2>
       <h2>Hello {value}</h2>
       <h2>Hello {value}</h2>
     </div>
   );
-  render(element, container!);
 };
 
-function updateValue(e) {
-  rerender(e.target.value);
-}
+// function updateValue(e) {
+//   Rerender(e.target.value);
+// }
+render(<Rerender value="123" />, container!);
 
-rerender("123");
+// const Name = () => {
+//   return <div>1234</div>;
+// }
+
+// function App(props) {
+//   return (
+//     <h1>
+//       Hi {props.name}
+//       <input onInput={updateValue} value={value} />
+//     </h1>
+//   );
+// }
+// const element = <App name="foo" />;
+// render(element, container!);

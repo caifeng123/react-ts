@@ -9,6 +9,7 @@ let deletions: Fiber[] = [];
 
 export const render = (element: JSX.Element, container: HTMLElement) => {
   wipRoot = new Fiber(element, { dom: container, alternate: currentRoot });
+  console.log(wipRoot);
   deletions = [];
   nextUnitOfWork = wipRoot;
 };

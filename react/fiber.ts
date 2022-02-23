@@ -22,6 +22,9 @@ export class Fiber {
     element: JSX.Element,
     { parent, effectTag, dom, alternate }: options = {}
   ) {
+    if (typeof element.type === "function") {
+      element = element.type(element.props);
+    }
     this.type = element.type;
     this.props = element.props;
     this.parent = parent;
